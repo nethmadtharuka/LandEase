@@ -1,0 +1,6 @@
+@LandEase.API_HostAddress = http://localhost:5153
+
+GET {{LandEase.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

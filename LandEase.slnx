@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="LandEase.API/LandEase.API.csproj" />
+  <Project Path="LandEase.Application/LandEase.Application.csproj" />
+  <Project Path="LandEase.Domain/LandEase.Domain.csproj" />
+  <Project Path="LandEase.Infrastructure/LandEase.Infrastructure.csproj" />
+  <Project Path="LandEase.Tests/LandEase.Tests.csproj" />
+</Solution>
