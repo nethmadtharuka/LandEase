@@ -60,6 +60,30 @@ public class AuthService : IAuthService
         return GenerateToken(user);
     }
 
+    public async Task<UserProfileDto> GetProfileAsync(int userId)
+{
+    var user = await _context.Users.FindAsync(userId);
+
+    if (user == null)
+        throw new Exception("User not found.");
+
+    return new UserProfileDto
+    {
+        Id = user.Id,
+        FullName = user.FullName,
+        Email = user.Email,
+        Role = user.Role.ToString(),
+        OriginCountry = user.OriginCountry,
+        DestinationCountry = user.DestinationCountry,
+        PhoneNumber = user.PhoneNumber,
+        MigrationStatus = user.MigrationStatus,
+        IsEmailVerified = user.IsEmailVerified,
+        IsKycVerified = user.IsKycVerified,
+        AverageRating = user.AverageRating,
+        CreatedAt = user.CreatedAt
+    };
+}
+
     private AuthResponseDto GenerateToken(User user)
     {
         var jwtSettings = _config.GetSection("JwtSettings");
