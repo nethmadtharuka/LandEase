@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LandEase.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86f5115425c806649923dcb70c881ad58f43ff28")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2bc7b1200ba76969e0ccdd9cccc2b2bc6ccbac01")]
 [assembly: System.Reflection.AssemblyProductAttribute("LandEase.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LandEase.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
