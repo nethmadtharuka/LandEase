@@ -1,6 +1,9 @@
 using LandEase.Application.DTOs.Auth;
 using LandEase.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 
 namespace LandEase.API.Controllers;
 
@@ -14,6 +17,26 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
+    
+    [HttpGet("profile")]
+[Authorize]
+public async Task<IActionResult> GetProfile()
+{
+    try
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim == null)
+            return Unauthorized(new { message = "Invalid token." });
+
+        var result = await _authService.GetProfileAsync(int.Parse(userIdClaim));
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return NotFound(new { message = ex.Message });
+    }
+}
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
