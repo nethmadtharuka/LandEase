@@ -28,7 +28,8 @@ builder.Services.AddScoped<IKycService, KycService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IServiceListingService, ServiceListingService>();
-
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 // ── FluentValidation ──────────────────────────────────────────
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<KycSubmissionValidator>();
