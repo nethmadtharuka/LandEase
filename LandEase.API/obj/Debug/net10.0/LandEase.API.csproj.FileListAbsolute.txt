@@ -140,3 +140,17 @@ E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\tr\Microsoft.CodeAn
 E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\appsettings.example.json
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\Azure.Core.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\Azure.Storage.Blobs.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\Azure.Storage.Common.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\FluentValidation.AspNetCore.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\FluentValidation.DependencyInjectionExtensions.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\MailKit.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\MimeKit.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\Newtonsoft.Json.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\SendGrid.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\StarkbankEcdsa.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\System.ClientModel.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\System.IO.Hashing.dll
+E:\Projects\LandEase\LandEase\LandEase.API\bin\Debug\net10.0\System.Memory.Data.dll
