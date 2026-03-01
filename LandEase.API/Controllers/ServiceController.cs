@@ -105,7 +105,7 @@ public class ServicesController : ControllerBase
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             await _serviceListingService.DeleteAsync(id, userId);
-            return Ok(ApiResponse<object>.Ok(null, "Service deactivated successfully."));
+return Ok(ApiResponse<string>.Ok("", "Service deactivated successfully."));
         }
         catch (Exception ex)
         {

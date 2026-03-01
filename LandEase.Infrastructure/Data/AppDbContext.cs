@@ -15,6 +15,11 @@ public class AppDbContext : DbContext
     public DbSet<Community> Communities => Set<Community>();
     public DbSet<CommunityMember> CommunityMembers => Set<CommunityMember>();
     public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
+    public DbSet<SosEvent> SosEvents => Set<SosEvent>();
+    public DbSet<SosAlert> SosAlerts => Set<SosAlert>();
+
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,6 +126,36 @@ public class AppDbContext : DbContext
                   .HasForeignKey(cp => cp.AuthorId)
                   .OnDelete(DeleteBehavior.NoAction);
         });
+
+        modelBuilder.Entity<SosEvent>(entity =>
+{
+    entity.HasKey(s => s.Id);
+    entity.Property(s => s.EventType).HasConversion<string>();
+    entity.Property(s => s.Status).HasConversion<string>();
+    entity.Property(s => s.Latitude).HasPrecision(10, 8);
+    entity.Property(s => s.Longitude).HasPrecision(11, 8);
+    entity.Property(s => s.Description).HasMaxLength(1000);
+
+    entity.HasOne(s => s.InitiatedByUser)
+          .WithMany()
+          .HasForeignKey(s => s.InitiatedByUserId)
+          .OnDelete(DeleteBehavior.Cascade);
+});
+
+modelBuilder.Entity<SosAlert>(entity =>
+{
+    entity.HasKey(a => a.Id);
+
+    entity.HasOne(a => a.SosEvent)
+          .WithMany(s => s.Alerts)
+          .HasForeignKey(a => a.SosEventId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+    entity.HasOne(a => a.AlertedUser)
+          .WithMany()
+          .HasForeignKey(a => a.AlertedUserId)
+          .OnDelete(DeleteBehavior.NoAction);
+});
 
         // ── Seed Data — 20 Popular Migration Corridors ────────
         modelBuilder.Entity<Community>().HasData(
