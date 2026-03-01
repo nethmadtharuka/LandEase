@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using LandEase.Infrastructure.Hubs;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,8 @@ builder.Services.AddScoped<IServiceListingService, ServiceListingService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ISosService, SosService>();
 
 
 // ── FluentValidation ──────────────────────────────────────────
@@ -112,5 +116,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<SosHub>("/hubs/sos");
 
 app.Run();
