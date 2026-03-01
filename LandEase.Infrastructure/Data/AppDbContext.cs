@@ -17,6 +17,10 @@ public class AppDbContext : DbContext
     public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
     public DbSet<SosEvent> SosEvents => Set<SosEvent>();
     public DbSet<SosAlert> SosAlerts => Set<SosAlert>();
+    public DbSet<ChatHistory> ChatHistories => Set<ChatHistory>();
+
+
+
 
 
 
@@ -155,6 +159,19 @@ modelBuilder.Entity<SosAlert>(entity =>
           .WithMany()
           .HasForeignKey(a => a.AlertedUserId)
           .OnDelete(DeleteBehavior.NoAction);
+});
+
+modelBuilder.Entity<ChatHistory>(entity =>
+{
+    entity.HasKey(ch => ch.Id);
+    entity.Property(ch => ch.Role).HasMaxLength(20).IsRequired();
+    entity.Property(ch => ch.SessionId).HasMaxLength(100).IsRequired();
+    entity.Property(ch => ch.Content).IsRequired();
+
+    entity.HasOne(ch => ch.User)
+          .WithMany()
+          .HasForeignKey(ch => ch.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
 });
 
         // ── Seed Data — 20 Popular Migration Corridors ────────
