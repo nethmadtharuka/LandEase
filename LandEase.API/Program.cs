@@ -38,6 +38,8 @@ builder.Services.AddScoped<ISosService, SosService>();
 builder.Services.AddScoped<IAiChatService, AiChatService>();
 builder.Services.AddScoped<GeminiAiService>();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<IFraudDetectionService, FraudDetectionService>();
 
 // ── FluentValidation ──────────────────────────────────────────
 builder.Services.AddFluentValidationAutoValidation();

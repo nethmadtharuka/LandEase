@@ -18,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<SosEvent> SosEvents => Set<SosEvent>();
     public DbSet<SosAlert> SosAlerts => Set<SosAlert>();
     public DbSet<ChatHistory> ChatHistories => Set<ChatHistory>();
+    public DbSet<FraudFlag> FraudFlags => Set<FraudFlag>();
+
 
 
 
@@ -171,6 +173,18 @@ modelBuilder.Entity<ChatHistory>(entity =>
     entity.HasOne(ch => ch.User)
           .WithMany()
           .HasForeignKey(ch => ch.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+});
+
+modelBuilder.Entity<FraudFlag>(entity =>
+{
+    entity.HasKey(f => f.Id);
+    entity.Property(f => f.FlagType).HasMaxLength(100).IsRequired();
+    entity.Property(f => f.Description).IsRequired();
+
+    entity.HasOne(f => f.User)
+          .WithMany()
+          .HasForeignKey(f => f.UserId)
           .OnDelete(DeleteBehavior.Cascade);
 });
 
