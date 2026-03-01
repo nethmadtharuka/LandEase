@@ -63,7 +63,7 @@ public class CommunityController : ControllerBase
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             await _communityService.JoinAsync(id, userId);
-            return Ok(ApiResponse<object>.Ok(null, "Joined community successfully."));
+return Ok(ApiResponse<string>.Ok("", "Joined community successfully."));
         }
         catch (Exception ex)
         {
@@ -80,7 +80,7 @@ public class CommunityController : ControllerBase
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             await _communityService.LeaveAsync(id, userId);
-            return Ok(ApiResponse<object>.Ok(null, "Left community successfully."));
+return Ok(ApiResponse<string>.Ok("", "Left community successfully."));
         }
         catch (Exception ex)
         {
