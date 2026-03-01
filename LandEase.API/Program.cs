@@ -35,7 +35,9 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<ISosService, SosService>();
-
+builder.Services.AddScoped<IAiChatService, AiChatService>();
+builder.Services.AddScoped<GeminiAiService>();
+builder.Services.AddHttpClient();
 
 // ── FluentValidation ──────────────────────────────────────────
 builder.Services.AddFluentValidationAutoValidation();
