@@ -4,7 +4,6 @@ using LandEase.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.RateLimiting;
 
 namespace LandEase.API.Controllers;
 
@@ -14,16 +13,22 @@ namespace LandEase.API.Controllers;
 public class AiController : ControllerBase
 {
     private readonly IAiChatService _aiChatService;
+    private readonly IRecommendationService _recommendationService;
 
     // Simple in-memory rate limiter per user
     private static readonly Dictionary<int, Queue<DateTime>> _requestLog = new();
     private static readonly object _lock = new();
     private const int MaxRequestsPerMinute = 10;
 
-    public AiController(IAiChatService aiChatService)
+    public AiController(
+        IAiChatService aiChatService,
+        IRecommendationService recommendationService)
     {
         _aiChatService = aiChatService;
+        _recommendationService = recommendationService;
     }
+
+    // ── Chat Endpoints ────────────────────────────────────────
 
     [HttpPost("chat")]
     public async Task<IActionResult> Chat([FromBody] ChatMessageDto dto)
@@ -33,10 +38,9 @@ public class AiController : ControllerBase
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            // Rate limiting check
             if (!IsWithinRateLimit(userId))
                 return StatusCode(429, ApiResponse<object>.Fail(
-                    "Too many requests. Please wait a moment before sending another message."));
+                    "Too many requests. Please wait before sending another message."));
 
             var result = await _aiChatService.ChatAsync(userId, dto);
             return Ok(ApiResponse<ChatResponseDto>.Ok(result));
@@ -83,6 +87,48 @@ public class AiController : ControllerBase
         }
     }
 
+    // ── Recommendation Endpoints ──────────────────────────────
+
+    [HttpGet("recommendations")]
+    [Authorize(Roles = "Migrant")]
+    public async Task<IActionResult> GetRecommendations()
+    {
+        try
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await _recommendationService
+                .GetRecommendationsAsync(userId);
+            return Ok(ApiResponse<List<RecommendationDto>>.Ok(result));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(
+                ApiResponse<List<RecommendationDto>>.Fail(ex.Message));
+        }
+    }
+
+    [HttpGet("recommendations/explain/{serviceId}")]
+    [Authorize(Roles = "Migrant")]
+    public async Task<IActionResult> GetExplanation(int serviceId)
+    {
+        try
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await _recommendationService
+                .GetExplanationAsync(userId, serviceId);
+            return Ok(ApiResponse<RecommendationExplanationDto>.Ok(result));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(
+                ApiResponse<RecommendationExplanationDto>.Fail(ex.Message));
+        }
+    }
+
+    // ── Rate Limiter ──────────────────────────────────────────
+
     private static bool IsWithinRateLimit(int userId)
     {
         lock (_lock)
@@ -95,7 +141,6 @@ public class AiController : ControllerBase
 
             var queue = _requestLog[userId];
 
-            // Remove requests older than 1 minute
             while (queue.Count > 0 && queue.Peek() < oneMinuteAgo)
                 queue.Dequeue();
 
