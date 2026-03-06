@@ -87,6 +87,29 @@ public class AiController : ControllerBase
         }
     }
 
+    // ── Translation Endpoint ──────────────────────────────────
+
+    [HttpPost("translate")]
+    public async Task<IActionResult> Translate([FromBody] TranslateDto dto)
+    {
+        try
+        {
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            if (!IsWithinRateLimit(userId))
+                return StatusCode(429, ApiResponse<object>.Fail(
+                    "Too many requests. Please wait before sending another message."));
+
+            var reply = await _aiChatService.TranslateAsync(dto);
+            return Ok(ApiResponse<object>.Ok(new { reply }));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<object>.Fail(ex.Message));
+        }
+    }
+
     // ── Recommendation Endpoints ──────────────────────────────
 
     [HttpGet("recommendations")]
