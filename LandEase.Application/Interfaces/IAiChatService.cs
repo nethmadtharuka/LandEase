@@ -9,4 +9,5 @@ public interface IAiChatService
     Task<PagedResultDto<ChatHistoryDto>> GetHistoryAsync(
         int userId, string? sessionId, int page, int pageSize);
     Task ClearHistoryAsync(int userId);
+    Task<string> TranslateAsync(TranslateDto dto);
 }
