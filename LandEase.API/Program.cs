@@ -40,7 +40,7 @@ builder.Services.AddScoped<GeminiAiService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IFraudDetectionService, FraudDetectionService>();
-
+builder.Services.AddScoped<IPlaceRecognitionService, PlaceRecognitionService>();
 // ── FluentValidation ──────────────────────────────────────────
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<KycSubmissionValidator>();
