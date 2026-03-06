@@ -82,6 +82,23 @@ public class AiChatService : IAiChatService
         };
     }
 
+    // ── Translation ───────────────────────────────────────────
+
+    public async Task<string> TranslateAsync(TranslateDto dto)
+    {
+        var systemPrompt = "You are a professional translator. Return ONLY the translated text, nothing else. No explanations, no quotes, no preamble.";
+
+        var reply = await _gemini.GenerateResponseAsync(
+            systemPrompt,
+            new List<(string Role, string Content)>(),
+            $"Translate the following text from {dto.FromLanguage} to {dto.ToLanguage}:\n\n{dto.Text}"
+        );
+
+        return reply;
+    }
+
+    // ── History ───────────────────────────────────────────────
+
     public async Task<PagedResultDto<ChatHistoryDto>> GetHistoryAsync(
         int userId, string? sessionId, int page, int pageSize)
     {
@@ -126,6 +143,8 @@ public class AiChatService : IAiChatService
         _context.ChatHistories.RemoveRange(history);
         await _context.SaveChangesAsync();
     }
+
+    // ── System Prompt ─────────────────────────────────────────
 
     private static string BuildSystemPrompt(Domain.Entities.User user)
     {
