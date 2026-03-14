@@ -1,0 +1,31 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Your_Database_Connection_String_Here",
+    "AzureStorage": "Your_Azure_Storage_Connection_String_Here"
+  },
+  "JwtSettings": {
+    "SecretKey": "Your_JWT_Secret_Key_Here",
+    "Issuer": "LandEase",
+    "Audience": "LandEaseUsers",
+    "ExpiryInDays": 7
+  },
+  "EmailSettings": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "EnableSsl": true,
+    "Username": "Your_Email_Here",
+    "Password": "Your_App_Password_Here"
+  },
+  "GeminiApi": {
+    "ApiKey": "Your_Google_Gemini_API_Key_Here",
+    "Model": "gemini-2.5-flash",
+    "BaseUrl": "https://generativelanguage.googleapis.com/v1beta/models"
+  }
+}
