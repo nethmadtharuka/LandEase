@@ -1,9 +1,9 @@
-using LandEase.API.Models;
 using LandEase.Application.DTOs.Auth;
 using LandEase.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+
 
 namespace LandEase.API.Controllers;
 
@@ -17,6 +17,26 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
+    
+    [HttpGet("profile")]
+[Authorize]
+public async Task<IActionResult> GetProfile()
+{
+    try
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim == null)
+            return Unauthorized(new { message = "Invalid token." });
+
+        var result = await _authService.GetProfileAsync(int.Parse(userIdClaim));
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return NotFound(new { message = ex.Message });
+    }
+}
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -24,12 +44,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.RegisterAsync(dto);
-            return Ok(ApiResponse<AuthResponseDto>.Ok(
-                result, "Registration successful."));
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            return BadRequest(ApiResponse<AuthResponseDto>.Fail(ex.Message));
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -39,31 +58,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.LoginAsync(dto);
-            return Ok(ApiResponse<AuthResponseDto>.Ok(result, "Login successful."));
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            return Unauthorized(ApiResponse<AuthResponseDto>.Fail(ex.Message));
-        }
-    }
-
-    [HttpGet("profile")]
-    [Authorize]
-    public async Task<IActionResult> GetProfile()
-    {
-        try
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
-                return Unauthorized(
-                    ApiResponse<UserProfileDto>.Fail("Invalid token."));
-
-            var result = await _authService.GetProfileAsync(int.Parse(userIdClaim));
-            return Ok(ApiResponse<UserProfileDto>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return NotFound(ApiResponse<UserProfileDto>.Fail(ex.Message));
+            return Unauthorized(new { message = ex.Message });
         }
     }
 }
