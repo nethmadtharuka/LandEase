@@ -18,4 +18,6 @@ public class User
     public decimal AverageRating { get; set; } = 0;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    public KycRecord? KycRecord { get; set; }
+
 }
