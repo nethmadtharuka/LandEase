@@ -10,6 +10,14 @@ public class ScoreResultDto
     public List<string> Weaknesses { get; set; } = new();
     public List<string> Suggestions { get; set; } = new();
     public string PublishedApprovalRate { get; set; } = string.Empty;
+    public List<DocumentAnalysisResultDto> DocumentResults { get; set; } = new();
+public DebateSummaryDto? DebateSummary { get; set; }
+public bool DocumentsVerified { get; set; }
+public List<string> DocumentFlags { get; set; } = new();
+// e.g. ["Bank statement covers only 4 months — 12 required"]
+
+
+    
     public string Disclaimer { get; set; } =
         "This tool provides estimated analysis based on publicly available " +
         "immigration criteria. Results are NOT guaranteed and do NOT constitute " +

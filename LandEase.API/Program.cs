@@ -44,7 +44,11 @@ builder.Services.AddScoped<IPlaceRecognitionService, PlaceRecognitionService>();
 // ── FluentValidation ──────────────────────────────────────────
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<KycSubmissionValidator>();
+builder.Services.AddScoped<DocumentIntelligenceService>();
+builder.Services.AddScoped<DebateAgentService>();
 builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
+builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
+
 // ── File Upload Limit ─────────────────────────────────────────
 builder.Services.Configure<FormOptions>(options =>
 {

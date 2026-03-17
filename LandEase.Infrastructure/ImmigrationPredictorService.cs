@@ -8,8 +8,9 @@ namespace LandEase.Infrastructure;
 public class ImmigrationPredictorService : IImmigrationPredictorService
 {
     private readonly GeminiAiService _gemini;
+    private readonly DocumentIntelligenceService _docService;
+    private readonly DebateAgentService _debateService;
 
-    // FIX 2: StringComparer.OrdinalIgnoreCase so "australia-skilledworker" matches too
     private static readonly Dictionary<string, string> _approvalRates =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -20,11 +21,21 @@ public class ImmigrationPredictorService : IImmigrationPredictorService
             { "Default",                  "Approval rates vary; consult official government sources" },
         };
 
-    public ImmigrationPredictorService(GeminiAiService gemini) => _gemini = gemini;
-
-    public async Task<ScoreResultDto> AnalyzeProfileAsync(ProfileSubmitDto dto)
+    public ImmigrationPredictorService(
+        GeminiAiService gemini,
+        DocumentIntelligenceService docService,
+        DebateAgentService debateService)
     {
-        // Rule-based scoring
+        _gemini        = gemini;
+        _docService    = docService;
+        _debateService = debateService;
+    }
+
+    public async Task<ScoreResultDto> AnalyzeProfileAsync(
+        ProfileSubmitDto dto,
+        List<(byte[] fileBytes, string docType)>? uploadedDocuments = null)
+    {
+        // ── Step 1: Rule-based scoring (unchanged) ──────────────────────────
         var (eduScore,  eduNote)  = ScoringEngine.ScoreEducation(dto.EducationLevel);
         var (workScore, workNote) = ScoringEngine.ScoreWorkExperience(dto.YearsOfWorkExperience, dto.HasJobOffer);
         var (langScore, langNote) = ScoringEngine.ScoreLanguage(dto.LanguageTest, dto.LanguageScore);
@@ -64,17 +75,44 @@ public class ImmigrationPredictorService : IImmigrationPredictorService
                 _     => "Weak"
             };
 
-        // Gemini qualitative analysis
+        // ── Step 2: Gemini qualitative analysis (unchanged) ─────────────────
         var aiAnalysis = await GetGeminiAnalysisAsync(dto, total, strength, categories);
 
-        // FIX 2: Normalise key — strip spaces, use TryGetValue for safe fallback
-        var rateKey    = $"{dto.DestinationCountry}-{dto.VisaType}".Replace(" ", "");
+        var rateKey = $"{dto.DestinationCountry}-{dto.VisaType}".Replace(" ", "");
         var approvalRate = _approvalRates.TryGetValue(rateKey, out var rate)
             ? rate
-            : _approvalRates["Default"];   // "Default" always exists so this is safe
+            : _approvalRates["Default"];
 
+        // ── Step 3: Document intelligence (new) ─────────────────────────────
+        var docResults = new List<DocumentAnalysisResultDto>();
+        if (uploadedDocuments != null)
+        {
+            foreach (var (bytes, docType) in uploadedDocuments)
+            {
+                var analysis = await _docService.AnalyzeDocumentAsync(
+                    bytes, docType, dto);
+                docResults.Add(analysis);
+            }
+        }
+
+        // ── Step 4: Multi-agent debate (new) ────────────────────────────────
+        var debate = await _debateService.RunDebateAsync(dto, total, docResults);
+
+        // ── Step 5: Collect document flags (new) ────────────────────────────
+        var flags = docResults
+            .SelectMany(d => d.Inconsistencies)
+            .Concat(docResults
+                .Where(d => d.IsExpired)
+                .Select(d => $"{d.DocumentType} is expired"))
+            .Concat(docResults
+                .Where(d => !d.IsComplete)
+                .SelectMany(d => d.MissingFields))
+            .ToList();
+
+        // ── Step 6: Return enriched result ──────────────────────────────────
         return new ScoreResultDto
         {
+            // existing fields — unchanged
             OverallScore          = total,
             StrengthLevel         = strength,
             Categories            = categories,
@@ -83,6 +121,12 @@ public class ImmigrationPredictorService : IImmigrationPredictorService
             Weaknesses            = aiAnalysis.weaknesses,
             Suggestions           = aiAnalysis.suggestions,
             PublishedApprovalRate = approvalRate,
+
+            // new fields
+            DocumentResults   = docResults,
+            DocumentFlags     = flags,
+            DocumentsVerified = docResults.Any(),
+            DebateSummary     = debate,
         };
     }
 
@@ -91,10 +135,6 @@ public class ImmigrationPredictorService : IImmigrationPredictorService
         GetGeminiAnalysisAsync(ProfileSubmitDto dto, int score,
                                string strength, List<CategoryScoreDto> categories)
     {
-        // FIX 1: Use $@"..." verbatim string correctly.
-        // In verbatim strings \" is a literal backslash + quote — Gemini sees it and
-        // gets confused. Use "" for a literal double-quote inside a verbatim string.
-        // Use {{ }} for literal braces in interpolated strings.
         var prompt = $@"You are an immigration profile advisor using only
 public, general knowledge about {dto.DestinationCountry} {dto.VisaType} requirements.
 
