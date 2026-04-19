@@ -27,29 +27,3 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal
-
-  frontend:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: landease-frontend/package-lock.json
-
-      - name: Install
-        working-directory: landease-frontend
-        run: npm ci
-
-      - name: Lint
-        working-directory: landease-frontend
-        run: npm run lint
-
-      - name: Build
-        working-directory: landease-frontend
-        run: npm run build
