@@ -3,6 +3,7 @@ using LandEase.Application.DTOs.Ai;
 using LandEase.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace LandEase.API.Controllers;
@@ -15,11 +16,6 @@ public class AiController : ControllerBase
     private readonly IAiChatService _aiChatService;
     private readonly IRecommendationService _recommendationService;
 
-    // Simple in-memory rate limiter per user
-    private static readonly Dictionary<int, Queue<DateTime>> _requestLog = new();
-    private static readonly object _lock = new();
-    private const int MaxRequestsPerMinute = 10;
-
     public AiController(
         IAiChatService aiChatService,
         IRecommendationService recommendationService)
@@ -31,16 +27,13 @@ public class AiController : ControllerBase
     // ── Chat Endpoints ────────────────────────────────────────
 
     [HttpPost("chat")]
+    [EnableRateLimiting("ai")]
     public async Task<IActionResult> Chat([FromBody] ChatMessageDto dto)
     {
         try
         {
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-            if (!IsWithinRateLimit(userId))
-                return StatusCode(429, ApiResponse<object>.Fail(
-                    "Too many requests. Please wait before sending another message."));
 
             var result = await _aiChatService.ChatAsync(userId, dto);
             return Ok(ApiResponse<ChatResponseDto>.Ok(result));
@@ -90,16 +83,13 @@ public class AiController : ControllerBase
     // ── Translation Endpoint ──────────────────────────────────
 
     [HttpPost("translate")]
+    [EnableRateLimiting("ai")]
     public async Task<IActionResult> Translate([FromBody] TranslateDto dto)
     {
         try
         {
             var userId = int.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-            if (!IsWithinRateLimit(userId))
-                return StatusCode(429, ApiResponse<object>.Fail(
-                    "Too many requests. Please wait before sending another message."));
 
             var reply = await _aiChatService.TranslateAsync(dto);
             return Ok(ApiResponse<object>.Ok(new { reply }));
@@ -150,28 +140,5 @@ public class AiController : ControllerBase
         }
     }
 
-    // ── Rate Limiter ──────────────────────────────────────────
-
-    private static bool IsWithinRateLimit(int userId)
-    {
-        lock (_lock)
-        {
-            var now = DateTime.UtcNow;
-            var oneMinuteAgo = now.AddMinutes(-1);
-
-            if (!_requestLog.ContainsKey(userId))
-                _requestLog[userId] = new Queue<DateTime>();
-
-            var queue = _requestLog[userId];
-
-            while (queue.Count > 0 && queue.Peek() < oneMinuteAgo)
-                queue.Dequeue();
-
-            if (queue.Count >= MaxRequestsPerMinute)
-                return false;
-
-            queue.Enqueue(now);
-            return true;
-        }
-    }
+    // Rate limiting for chat/translate is handled by ASP.NET Core rate limiting middleware.
 }

@@ -8,9 +8,11 @@ using LandEase.Infrastructure.Data;
 using LandEase.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Threading.RateLimiting;
 using System.Text;
 using LandEase.Infrastructure.Hubs;
 
@@ -23,6 +25,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         ServerVersion.AutoDetect(
             builder.Configuration.GetConnectionString("DefaultConnection"))));
+
+// ── Health Checks ─────────────────────────────────────────────
+builder.Services
+    .AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("db");
 
 // ── Application Services ──────────────────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -48,6 +55,29 @@ builder.Services.AddScoped<DocumentIntelligenceService>();
 builder.Services.AddScoped<DebateAgentService>();
 builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
 builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
+
+// ── Rate Limiting (AI endpoints) ──────────────────────────────
+var aiRequestsPerMinute = builder.Configuration.GetValue<int?>("RateLimiting:AiEndpointsPerMinute") ?? 10;
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("ai", httpContext =>
+    {
+        var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var partitionKey = userId ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: partitionKey,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = aiRequestsPerMinute,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            });
+    });
+});
 
 // ── File Upload Limit ─────────────────────────────────────────
 builder.Services.Configure<FormOptions>(options =>
@@ -131,9 +161,11 @@ app.UseSwaggerUI(c =>
 });
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.MapHub<SosHub>("/hubs/sos");
 
 app.Run();

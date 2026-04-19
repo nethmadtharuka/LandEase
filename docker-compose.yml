@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: landease-mysql
+    environment:
+      MYSQL_DATABASE: landease
+      MYSQL_USER: landease
+      MYSQL_PASSWORD: landease_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: landease-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=db;Port=3306;Database=landease;User=landease;Password=landease_password;"
+      JwtSettings__Secret: "CHANGE_ME_IN_PROD"
+      JwtSettings__Issuer: "LandEaseAPI"
+      JwtSettings__Audience: "LandEaseClient"
+      JwtSettings__ExpiryMinutes: "60"
+      # Optional: keep these empty locally unless you’re testing the integrations
+      AzureStorage__ConnectionString: ""
+      AzureStorage__ContainerName: "kyc-documents"
+      EmailSettings__Host: "smtp.gmail.com"
+      EmailSettings__Port: "587"
+      EmailSettings__SenderEmail: ""
+      EmailSettings__SenderName: "LandEase"
+      EmailSettings__Password: ""
+      GeminiApi__ApiKey: ""
+      GeminiApi__Model: "gemini-2.0-flash"
+      GeminiApi__BaseUrl: "https://generativelanguage.googleapis.com/v1beta/models"
+    ports:
+      - "5153:8080"
+
+volumes:
+  mysql_data:
+
