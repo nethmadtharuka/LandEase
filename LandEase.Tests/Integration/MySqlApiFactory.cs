@@ -25,10 +25,6 @@ public sealed class MySqlApiFactory : WebApplicationFactory<Program>
             var settings = new Dictionary<string, string?>
             {
                 ["ConnectionStrings:DefaultConnection"] = _connectionString,
-                ["JwtSettings:Secret"] = "TEST_ONLY_SUPER_SECRET_CHANGE_ME",
-                ["JwtSettings:Issuer"] = "LandEaseAPI",
-                ["JwtSettings:Audience"] = "LandEaseClient",
-                ["JwtSettings:ExpiryMinutes"] = "60",
                 ["RateLimiting:AiEndpointsPerMinute"] = "1000"
             };
 

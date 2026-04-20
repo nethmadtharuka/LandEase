@@ -53,6 +53,16 @@ public sealed class AuthAndBookingFlowTests : IClassFixture<MySqlContainerFixtur
         // Create service as helper
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", helperAuth!.Data!.Token);
 
+        // Sanity check token works
+        var profileResp = await client.GetAsync("/api/Auth/profile");
+        if (!profileResp.IsSuccessStatusCode)
+        {
+            var bodyText = await profileResp.Content.ReadAsStringAsync();
+            var authHeader = profileResp.Headers.WwwAuthenticate.ToString();
+            throw new Xunit.Sdk.XunitException(
+                $"Profile failed: {(int)profileResp.StatusCode} {profileResp.StatusCode}\nWWW-Authenticate: {authHeader}\n{bodyText}");
+        }
+
         var createService = new CreateServiceDto
         {
             Title = "Airport Pickup",
