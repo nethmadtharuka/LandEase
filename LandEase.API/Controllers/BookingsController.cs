@@ -23,84 +23,49 @@ public class BookingsController : ControllerBase
     [Authorize(Roles = "Migrant")]
     public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _bookingService.CreateAsync(userId, dto);
-            return Ok(ApiResponse<BookingDto>.Ok(
-                result, "Booking created successfully."));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<BookingDto>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _bookingService.CreateAsync(userId, dto);
+        return Ok(ApiResponse<BookingDto>.Ok(
+            result, "Booking created successfully."));
     }
 
     [HttpGet("mine")]
     public async Task<IActionResult> GetMyBookings()
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _bookingService.GetMyBookingsAsync(userId);
-            return Ok(ApiResponse<List<BookingDto>>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<List<BookingDto>>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _bookingService.GetMyBookingsAsync(userId);
+        return Ok(ApiResponse<List<BookingDto>>.Ok(result));
     }
 
     [HttpGet("incoming")]
     [Authorize(Roles = "Helper")]
     public async Task<IActionResult> GetIncoming()
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _bookingService.GetIncomingBookingsAsync(userId);
-            return Ok(ApiResponse<List<BookingDto>>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<List<BookingDto>>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _bookingService.GetIncomingBookingsAsync(userId);
+        return Ok(ApiResponse<List<BookingDto>>.Ok(result));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _bookingService.GetByIdAsync(id, userId);
-            return Ok(ApiResponse<BookingDto>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<BookingDto>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _bookingService.GetByIdAsync(id, userId);
+        return Ok(ApiResponse<BookingDto>.Ok(result));
     }
 
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateStatus(
         int id, [FromBody] UpdateBookingStatusDto dto)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _bookingService.UpdateStatusAsync(id, userId, dto);
-            return Ok(ApiResponse<BookingDto>.Ok(
-                result, "Booking status updated successfully."));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<BookingDto>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _bookingService.UpdateStatusAsync(id, userId, dto);
+        return Ok(ApiResponse<BookingDto>.Ok(
+            result, "Booking status updated successfully."));
     }
 }

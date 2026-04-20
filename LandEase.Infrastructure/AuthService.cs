@@ -1,4 +1,5 @@
 using LandEase.Application.DTOs.Auth;
+using LandEase.Application.Exceptions;
 using LandEase.Application.Interfaces;
 using LandEase.Domain.Entities;
 using LandEase.Infrastructure.Data;
@@ -28,7 +29,7 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
         if (existingUser != null)
-            throw new Exception("Email already registered.");
+            throw new ConflictException("Email already registered.");
 
         var user = new User
         {
@@ -55,7 +56,7 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.Email == dto.Email.ToLower().Trim());
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-            throw new Exception("Invalid email or password.");
+            throw new UnauthorizedException("Invalid email or password.");
 
         return GenerateToken(user);
     }
@@ -65,7 +66,7 @@ public class AuthService : IAuthService
     var user = await _context.Users.FindAsync(userId);
 
     if (user == null)
-        throw new Exception("User not found.");
+        throw new NotFoundException("User not found.");
 
     return new UserProfileDto
     {

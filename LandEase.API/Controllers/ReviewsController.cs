@@ -22,31 +22,17 @@ public class ReviewsController : ControllerBase
     [Authorize(Roles = "Migrant")]
     public async Task<IActionResult> Create([FromBody] CreateReviewDto dto)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _reviewService.CreateAsync(userId, dto);
-            return Ok(ApiResponse<ReviewDto>.Ok(
-                result, "Review submitted successfully."));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<ReviewDto>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _reviewService.CreateAsync(userId, dto);
+        return Ok(ApiResponse<ReviewDto>.Ok(
+            result, "Review submitted successfully."));
     }
 
     [HttpGet("provider/{providerId}")]
     public async Task<IActionResult> GetByProvider(int providerId)
     {
-        try
-        {
-            var result = await _reviewService.GetByProviderAsync(providerId);
-            return Ok(ApiResponse<List<ReviewDto>>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<List<ReviewDto>>.Fail(ex.Message));
-        }
+        var result = await _reviewService.GetByProviderAsync(providerId);
+        return Ok(ApiResponse<List<ReviewDto>>.Ok(result));
     }
 }

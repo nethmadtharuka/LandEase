@@ -30,18 +30,11 @@ public class AiController : ControllerBase
     [EnableRateLimiting("ai")]
     public async Task<IActionResult> Chat([FromBody] ChatMessageDto dto)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _aiChatService.ChatAsync(userId, dto);
-            return Ok(ApiResponse<ChatResponseDto>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<ChatResponseDto>.Fail(ex.Message));
-        }
+        var result = await _aiChatService.ChatAsync(userId, dto);
+        return Ok(ApiResponse<ChatResponseDto>.Ok(result));
     }
 
     [HttpGet("chat/history")]
@@ -50,34 +43,20 @@ public class AiController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _aiChatService.GetHistoryAsync(
-                userId, sessionId, page, pageSize);
-            return Ok(ApiResponse<object>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<object>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _aiChatService.GetHistoryAsync(
+            userId, sessionId, page, pageSize);
+        return Ok(ApiResponse<object>.Ok(result));
     }
 
     [HttpDelete("chat/history")]
     public async Task<IActionResult> ClearHistory()
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            await _aiChatService.ClearHistoryAsync(userId);
-            return Ok(ApiResponse<string>.Ok("", "Chat history cleared successfully."));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<string>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        await _aiChatService.ClearHistoryAsync(userId);
+        return Ok(ApiResponse<string>.Ok("", "Chat history cleared successfully."));
     }
 
     // ── Translation Endpoint ──────────────────────────────────
@@ -86,18 +65,11 @@ public class AiController : ControllerBase
     [EnableRateLimiting("ai")]
     public async Task<IActionResult> Translate([FromBody] TranslateDto dto)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        _ = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var reply = await _aiChatService.TranslateAsync(dto);
-            return Ok(ApiResponse<object>.Ok(new { reply }));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<object>.Fail(ex.Message));
-        }
+        var reply = await _aiChatService.TranslateAsync(dto);
+        return Ok(ApiResponse<object>.Ok(new { reply }));
     }
 
     // ── Recommendation Endpoints ──────────────────────────────
@@ -106,38 +78,22 @@ public class AiController : ControllerBase
     [Authorize(Roles = "Migrant")]
     public async Task<IActionResult> GetRecommendations()
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _recommendationService
-                .GetRecommendationsAsync(userId);
-            return Ok(ApiResponse<List<RecommendationDto>>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(
-                ApiResponse<List<RecommendationDto>>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _recommendationService
+            .GetRecommendationsAsync(userId);
+        return Ok(ApiResponse<List<RecommendationDto>>.Ok(result));
     }
 
     [HttpGet("recommendations/explain/{serviceId}")]
     [Authorize(Roles = "Migrant")]
     public async Task<IActionResult> GetExplanation(int serviceId)
     {
-        try
-        {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var result = await _recommendationService
-                .GetExplanationAsync(userId, serviceId);
-            return Ok(ApiResponse<RecommendationExplanationDto>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(
-                ApiResponse<RecommendationExplanationDto>.Fail(ex.Message));
-        }
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _recommendationService
+            .GetExplanationAsync(userId, serviceId);
+        return Ok(ApiResponse<RecommendationExplanationDto>.Ok(result));
     }
 
     // Rate limiting for chat/translate is handled by ASP.NET Core rate limiting middleware.

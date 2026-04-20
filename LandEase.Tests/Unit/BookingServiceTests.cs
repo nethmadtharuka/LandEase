@@ -60,7 +60,7 @@ public class BookingServiceTests
 
         var bookingSvc = new BookingService(context);
 
-        var ex = await Assert.ThrowsAsync<Exception>(
+        var ex = await Assert.ThrowsAsync<LandEase.Application.Exceptions.ConflictException>(
             () => bookingSvc.CreateAsync(helper.Id,
                 new CreateBookingDto { ServiceId = listing.Id }));
 
@@ -89,7 +89,7 @@ public class BookingServiceTests
         await bookingSvc.CreateAsync(migrant.Id,
             new CreateBookingDto { ServiceId = listing.Id });
 
-        var ex = await Assert.ThrowsAsync<Exception>(
+        var ex = await Assert.ThrowsAsync<LandEase.Application.Exceptions.ConflictException>(
             () => bookingSvc.CreateAsync(migrant.Id,
                 new CreateBookingDto { ServiceId = listing.Id }));
 
@@ -149,7 +149,7 @@ public class BookingServiceTests
         var booking = await bookingSvc.CreateAsync(migrant.Id,
             new CreateBookingDto { ServiceId = listing.Id });
 
-        var ex = await Assert.ThrowsAsync<Exception>(
+        var ex = await Assert.ThrowsAsync<LandEase.Application.Exceptions.ForbiddenException>(
             () => bookingSvc.UpdateStatusAsync(
                 booking.Id, migrant.Id,
                 new UpdateBookingStatusDto { Status = BookingStatus.Accepted }));
@@ -179,7 +179,7 @@ public class BookingServiceTests
         var booking = await bookingSvc.CreateAsync(migrant.Id,
             new CreateBookingDto { ServiceId = listing.Id });
 
-        var ex = await Assert.ThrowsAsync<Exception>(
+        var ex = await Assert.ThrowsAsync<LandEase.Application.Exceptions.ConflictException>(
             () => bookingSvc.UpdateStatusAsync(
                 booking.Id, helper.Id,
                 new UpdateBookingStatusDto { Status = BookingStatus.Completed }));
