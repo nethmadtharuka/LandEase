@@ -22,18 +22,11 @@ public class PlaceController : ControllerBase
     public async Task<IActionResult> Recognize(
         [FromBody] PlaceRecognitionRequestDto dto)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(dto.ImageBase64))
-                return BadRequest(ApiResponse<object>.Fail(
-                    "Image data is required."));
+        if (string.IsNullOrWhiteSpace(dto.ImageBase64))
+            return BadRequest(ApiResponse<object>.Fail(
+                "Image data is required."));
 
-            var result = await _placeService.RecognizePlaceAsync(dto);
-            return Ok(ApiResponse<PlaceRecognitionResponseDto>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<object>.Fail(ex.Message));
-        }
+        var result = await _placeService.RecognizePlaceAsync(dto);
+        return Ok(ApiResponse<PlaceRecognitionResponseDto>.Ok(result));
     }
 }

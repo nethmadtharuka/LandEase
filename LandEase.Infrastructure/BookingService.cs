@@ -1,4 +1,5 @@
 using LandEase.Application.DTOs.Bookings;
+using LandEase.Application.Exceptions;
 using LandEase.Application.Interfaces;
 using LandEase.Domain.Entities;
 using LandEase.Domain.Enums;
@@ -21,13 +22,13 @@ public class BookingService : IBookingService
         var service = await _context.ServiceListings
             .Include(s => s.Provider)
             .FirstOrDefaultAsync(s => s.Id == dto.ServiceId)
-            ?? throw new Exception("Service not found or is no longer available.");
+            ?? throw new NotFoundException("Service not found or is no longer available.");
 
         if (!service.IsActive)
-            throw new Exception("This service is no longer available.");
+            throw new ConflictException("This service is no longer available.");
 
         if (service.ProviderId == migrantId)
-            throw new Exception("You cannot book your own service.");
+            throw new ConflictException("You cannot book your own service.");
 
         var existingBooking = await _context.Bookings
             .AnyAsync(b =>
@@ -37,7 +38,7 @@ public class BookingService : IBookingService
                 b.Status != BookingStatus.Completed);
 
         if (existingBooking)
-            throw new Exception(
+            throw new ConflictException(
                 "You already have an active booking for this service.");
 
         var booking = new Booking
@@ -90,11 +91,11 @@ public class BookingService : IBookingService
             .Include(b => b.Migrant)
             .Include(b => b.Review)
             .FirstOrDefaultAsync(b => b.Id == bookingId)
-            ?? throw new Exception("Booking not found.");
+            ?? throw new NotFoundException("Booking not found.");
 
         if (booking.MigrantId != requestingUserId &&
             booking.Service.ProviderId != requestingUserId)
-            throw new Exception("You are not authorized to view this booking.");
+            throw new ForbiddenException("You are not authorized to view this booking.");
 
         return MapToDto(booking);
     }
@@ -108,7 +109,7 @@ public class BookingService : IBookingService
             .Include(b => b.Migrant)
             .Include(b => b.Review)
             .FirstOrDefaultAsync(b => b.Id == bookingId)
-            ?? throw new Exception("Booking not found.");
+            ?? throw new NotFoundException("Booking not found.");
 
         var isProvider = booking.Service.ProviderId == requestingUserId;
         var isMigrant = booking.MigrantId == requestingUserId;
@@ -119,29 +120,29 @@ public class BookingService : IBookingService
             case BookingStatus.Accepted:
             case BookingStatus.InProgress:
                 if (!isProvider)
-                    throw new Exception(
+                    throw new ForbiddenException(
                         "Only the service provider can accept or start a booking.");
                 break;
 
             case BookingStatus.Completed:
                 if (!isProvider)
-                    throw new Exception(
+                    throw new ForbiddenException(
                         "Only the service provider can mark a booking as completed.");
                 if (booking.Status != BookingStatus.InProgress)
-                    throw new Exception(
+                    throw new ConflictException(
                         "Only in-progress bookings can be marked as completed.");
                 break;
 
             case BookingStatus.Cancelled:
                 if (!isMigrant && !isProvider)
-                    throw new Exception(
+                    throw new ForbiddenException(
                         "Only the migrant or provider can cancel a booking.");
                 if (booking.Status == BookingStatus.Completed)
-                    throw new Exception("Cannot cancel a completed booking.");
+                    throw new ConflictException("Cannot cancel a completed booking.");
                 break;
 
             default:
-                throw new Exception("Invalid status transition.");
+                throw new ConflictException("Invalid status transition.");
         }
 
         booking.Status = dto.Status;

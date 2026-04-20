@@ -9,8 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Testcontainers" Version="4.11.0" />
+    <PackageReference Include="Testcontainers.MySql" Version="4.11.0" />
     <PackageReference Include="FluentAssertions" Version="8.8.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -23,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LandEase.Application\LandEase.Application.csproj" />
+    <ProjectReference Include="..\LandEase.API\LandEase.API.csproj" />
     <ProjectReference Include="..\LandEase.Infrastructure\LandEase.Infrastructure.csproj" />
   </ItemGroup>
 

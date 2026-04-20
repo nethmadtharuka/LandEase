@@ -54,7 +54,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<KycSubmissionValidator>();
 builder.Services.AddScoped<DocumentIntelligenceService>();
 builder.Services.AddScoped<DebateAgentService>();
 builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
-builder.Services.AddScoped<IImmigrationPredictorService, ImmigrationPredictorService>();
 
 // ── Rate Limiting (AI endpoints) ──────────────────────────────
 var aiRequestsPerMinute = builder.Configuration.GetValue<int?>("RateLimiting:AiEndpointsPerMinute") ?? 10;
@@ -87,6 +86,12 @@ builder.Services.Configure<FormOptions>(options =>
 
 // ── JWT Authentication ────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var jwtSecret = jwtSettings["Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret) || Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+{
+    throw new InvalidOperationException(
+        $"JwtSettings:Secret must be at least 32 bytes for HS256. Current length: {Encoding.UTF8.GetByteCount(jwtSecret ?? string.Empty)} bytes.");
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -99,7 +104,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Secret"]!))
+                Encoding.UTF8.GetBytes(jwtSecret))
         };
     });
 
@@ -159,7 +164,10 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "LandEase API v1");
     c.RoutePrefix = string.Empty;
 });
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -169,3 +177,5 @@ app.MapHealthChecks("/health");
 app.MapHub<SosHub>("/hubs/sos");
 
 app.Run();
+
+public partial class Program { }
